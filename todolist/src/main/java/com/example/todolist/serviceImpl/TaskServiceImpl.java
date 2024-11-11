@@ -26,21 +26,58 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public ResponseEntity<?> getTasks(int page, int size) {
+    public ResponseEntity<?> getUserTasks(int page, int size) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         List<TaskModel> tasks = taskRepository.findTasksByUserId(username.hashCode(),page,size);
         return ResponseEntity.ok(tasks);
     }
 
+    public ResponseEntity<?> getTaskById(int taskId){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        TaskModel taskModel=taskRepository.findTasksById(taskId,username.hashCode());
+        if(taskModel == null){
+            return ResponseEntity.status(403).body("Access denied or task not found");
+        }
+        return ResponseEntity.ok(taskModel);
+    }
+
     @Override
-    public ResponseEntity<?> updateTask(int id, TaskDTO taskDTO) {
-        taskRepository.updateTask(id,taskDTO);
+    public ResponseEntity<?> getAllTasks() {
+        //check if the user is an admin
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            // Admin can access all tasks
+            List<TaskModel> tasks = taskRepository.findAllTasks();
+            return ResponseEntity.ok(tasks);
+        } else {
+            // Return an error if not Admin
+            return ResponseEntity.status(403).body("Access denied. Admins only.");
+        }
+
+    }
+
+
+    @Override
+    public ResponseEntity<?> updateTask(int taskId, TaskDTO taskDTO) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        taskDTO.setUserId(username.hashCode());
+        boolean updated = taskRepository.updateTask(taskId,taskDTO);
+        if(!updated){
+            return ResponseEntity.status(403).body("Access denied or task not found");
+        }
         return ResponseEntity.ok("Task updated successfully");
     }
 
     @Override
-    public ResponseEntity<?> deleteTask(int id) {
-        taskRepository.deleteTask(id);
+    public ResponseEntity<?> deleteTask(int taskId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        boolean deleted = taskRepository.deleteTask(taskId,username.hashCode());
+        if(!deleted){
+            return ResponseEntity.status(403).body("Access denied or task not found");
+        }
         return ResponseEntity.ok("Task deleted successfully");
     }
 }

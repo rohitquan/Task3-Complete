@@ -13,24 +13,43 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
 
-    @PostMapping
+    // Creates a new Task
+    @PostMapping("/create")
     public ResponseEntity<?> createTask(@RequestBody TaskDTO taskDTO) {
         return taskService.createTask(taskDTO);
     }
 
-    @GetMapping
-    public ResponseEntity<?> getTasks(@RequestParam(defaultValue = "0") int page,
-                                      @RequestParam(defaultValue = "10") int size) {
-        return taskService.getTasks(page,size);
+    // Gets All tasks for authenticated user(with pagination)
+    @GetMapping("/user")
+    public ResponseEntity<?> getUserTasks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return taskService.getUserTasks(page,size);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateTask(@PathVariable int id, @RequestBody TaskDTO taskDTO) {
-        return taskService.updateTask(id, taskDTO);
+    // Get all tasks for admin (all users tasks)
+    @GetMapping("/admin")
+    public ResponseEntity<?> getAllTasks() {
+        return taskService.getAllTasks();
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTask(@PathVariable int id) {
-        return taskService.deleteTask(id);
+    // Get a specific task by ID
+    @GetMapping("/{taskId}")
+    public ResponseEntity<?> getTaskById(@PathVariable int taskId) {
+        return taskService.getTaskById(taskId);
+    }
+
+    // Get a specific task by ID
+    @PutMapping("/update/{taskId}")
+    public ResponseEntity<?> updateTask(
+            @PathVariable int taskId,
+            @RequestBody TaskDTO taskDTO) {
+        return taskService.updateTask(taskId, taskDTO);
+    }
+
+    // Delete a task by ID
+    @DeleteMapping("/delete/{taskId}")
+    public ResponseEntity<?> deleteTask(@PathVariable int taskId) {
+        return taskService.deleteTask(taskId);
     }
 }

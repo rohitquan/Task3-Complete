@@ -18,8 +18,8 @@ public class TaskRepositoryImpl implements TaskRepository {
 
     @Override
     public void saveTask(TaskDTO task) {
-        String sql = "INSERT INTO tasks (user_id, title, description, completed) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, task.getUserId(), task.getTitle(), task.getDescription(), task.isCompleted());
+        String sql = "INSERT INTO tasks (user_id, title, description, status) VALUES (?, ?, ?, ?)";
+        jdbcTemplate.update(sql, task.getUserId(), task.getTitle(), task.getDescription(), task.getStatus());
     }
 
     @Override
@@ -29,21 +29,32 @@ public class TaskRepositoryImpl implements TaskRepository {
         return jdbcTemplate.query(sql, new TaskModelRowMapper(), userId, size, offset);
     }
 
-    @Override
-    public TaskModel findById(int id) {
-        String sql = "SELECT * FROM tasks WHERE id = ?";
-        return jdbcTemplate.queryForObject(sql, new TaskModelRowMapper(), id);
+    // Method to get all tasks (for Admin to see all users' tasks)
+    public List<TaskModel> findAllTasks() {
+        String sql = "SELECT id, title, description, completed, user_id FROM tasks";
+        // RowMapper for Mapping the query result to TaskModel
+        return jdbcTemplate.query(sql,new TaskModelRowMapper());
     }
 
     @Override
-    public void updateTask(int id,TaskDTO task) {
-        String sql = "UPDATE tasks SET title = ?, description = ?, completed = ? WHERE id = ?";
-        jdbcTemplate.update(sql, task.getTitle(), task.getDescription(), task.isCompleted(), id);
+    public TaskModel findTasksById(int taskId,int userId) {
+        String sql = "SELECT * FROM tasks WHERE id = ? AND user_id";
+        List<TaskModel> taskModels = jdbcTemplate.query(sql, new TaskModelRowMapper(), taskId, userId);
+        return taskModels.isEmpty() ? null : taskModels.getFirst();
     }
 
     @Override
-    public void deleteTask(int id) {
-        String sql = "DELETE FROM tasks WHERE id = ?";
-        jdbcTemplate.update(sql, id);
+    public boolean updateTask(int taskId,TaskDTO task) {
+        String sql = "UPDATE tasks SET title = ?, description = ?, status = ? WHERE id = ? AND user_id = ?";
+        int rows = jdbcTemplate.update(sql, task.getTitle(), task.getDescription(), task.getStatus(), taskId,task.getUserId());
+        return rows > 0;
     }
+
+    @Override
+    public boolean deleteTask(int taskId, int userId) {
+        String sql = "DELETE FROM tasks WHERE id = ? AND user_id= ? ";
+        int rows = jdbcTemplate.update(sql, taskId, userId);
+        return rows>0;
+    }
+
 }

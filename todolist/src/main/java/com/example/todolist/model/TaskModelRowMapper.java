@@ -14,7 +14,7 @@ public class TaskModelRowMapper implements RowMapper<TaskModel> {
         task.setUserId(rs.getInt("user_id"));
         task.setTitle(rs.getString("title"));
         task.setDescription(rs.getString("description"));
-        task.setCompleted(rs.getBoolean("completed"));
+        task.setStatus(rs.getString("status"));
         return task;
     }
 }

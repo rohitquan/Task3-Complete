@@ -5,7 +5,9 @@ import org.springframework.http.ResponseEntity;
 
 public interface TaskService {
     ResponseEntity<?> createTask(TaskDTO taskDTO);
-    ResponseEntity<?> getTasks(int page,int size);
-    ResponseEntity<?> updateTask(int id, TaskDTO taskDTO);
-    ResponseEntity<?> deleteTask(int id);
+    ResponseEntity<?> getUserTasks(int page,int size);
+    ResponseEntity<?> getTaskById(int taskId);
+    ResponseEntity<?> updateTask(int taskId, TaskDTO taskDTO);
+    ResponseEntity<?> deleteTask(int taskId);
+    ResponseEntity<?> getAllTasks();
 }
